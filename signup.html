@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h2>Create an Account</h2>
+        <form id="signupForm">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="text" name="phone_number" placeholder="Phone Number" required>
+            <button type="submit">Sign Up</button>
+        </form>
+        <div id="message"></div>
+
+        <h3>Registered Users:</h3>
+        <ul id="users"></ul>
+    </div>
+    <script>
+        // Fetch and display users
+        function fetchUsers() {
+            fetch('/users')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Fetched users:', data); // Log fetched users
+                    const userList = document.getElementById('users');
+                    userList.innerHTML = ''; // Clear existing users
+                    data.forEach(user => {
+                        const li = document.createElement('li');
+                        li.textContent = `${user.username || 'N/A'} - ${user.email || 'N/A'} - ${user.phone_number || 'N/A'}`;
+                        userList.appendChild(li);
+                    });
+                })
+                .catch(error => console.error('Error fetching users:', error));
+        }
+
+        document.getElementById('signupForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('/signup', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('message').innerText = data.message;
+                    this.reset(); // Reset form
+                    fetchUsers(); // Refresh user list
+                })
+                .catch(error => {
+                    document.getElementById('message').innerText = 'Error: ' + error.message;
+                });
+        });
+
+        // Fetch users on page load
+        window.onload = fetchUsers;
+    </script>
+</body>
+
+</html>
